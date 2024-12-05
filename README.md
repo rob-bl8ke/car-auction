@@ -32,10 +32,34 @@ It creates a file like:
     "version": "7.0.101"
   }
 }
-
+```
 Build up the solution and its project structure.
 ```
 dotnet new sln
 dotnet new webapi -o src/AuctionService -controllers
 dotnet sln add .\src\AuctionService
+
+dotnet watch --project .\src\AuctionService\
+```
+
+Add the packages
+
+```
+dotnet add .\src\AuctionService\ package AutoMapper --version 13.0.1
+dotnet add .\src\AuctionService\ package AutoMapper.Extensions.Microsoft.DependencyInjection 
+dotnet add .\src\AuctionService\ package Microsoft.EntityFrameworkCore.Design --version 8.0.11
+dotnet add .\src\AuctionService\ package Npgsql.EntityFrameworkCore.PostgreSQL --version 8.0.11
+```
+Remove the unnecessary stuff
+
+- Remove all Swagger code and configuration.
+- Remove any template controllers and entities.
+- Remove all unnecessary profiles from  `launchSettings` except for `http`. 
+- Remove HTTPS configuration and middleware.
+
+### Run and watch the solution
+
+```
+cd .\src\AuctionService\
+dotnet watch
 ```

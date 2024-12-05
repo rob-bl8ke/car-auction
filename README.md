@@ -82,3 +82,22 @@ Finally create the first migration
 cd .\src\AuctionService\
 dotnet ef migrations add "InitialCreate" -o Data/Migrations
 ```
+
+### Dockerizing the Database
+
+- Create the `docker-compose.yml` file as shown and run
+
+```
+docker compose up
+```
+
+- Use `docker compose up -d` to run the postgres server in detached mode (you won't see the logs in the terminal).
+- Look for `LOG:  database system is ready to accept connections`.
+- Run the migrations to make sure it works...
+
+```
+dotnet ef database update
+```
+- Should end with `Done.`
+- Install [PostgreSQL extension by Chris Kolkman for VS Code](https://marketplace.visualstudio.com/items?itemName=ckolkman.vscode-postgres) to see the database.
+- A new tab is created and you can navigate to the PostgreSQL explorer and create a connection to your database. Follow the instructions using your connection string as a guide to open the database to view.

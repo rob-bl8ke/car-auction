@@ -63,3 +63,22 @@ Remove the unnecessary stuff
 cd .\src\AuctionService\
 dotnet watch
 ```
+
+### Adding the `DbContext`
+
+- Once the `DbContext` has been defined in code go to the terminal.
+- Look for the `dotnet-ef` tool. If its installed it should show up with `dotnet tool list -g` for globally installed or `dotnet tool list -l` for locally installed.
+- Install it with `dotnet tool install dotnet-ef -g` if it doesn't exist. If it exists, just update it with `dotnet tool update dotnet-ef -g`. If you have a number of projects, you may wish to install it locally rather than globally.
+
+You can simply uninstall and install it again.
+```
+dotnet tool uninstall -g dotnet-ef
+dotnet tool install dotnet-ef -g --version 8.0.11
+```
+
+Finally create the first migration
+
+```
+cd .\src\AuctionService\
+dotnet ef migrations add "InitialCreate" -o Data/Migrations
+```

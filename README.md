@@ -173,6 +173,10 @@ The `Item` class does not contain and Id property because it inherits from `Enti
 
 Using a paged search with MongoDB.Entities is very simple. Simply use the `PagedSearch` method. The result will include the `PageCount`, `TotalCount`, and the results. See `SearchController`.
 
+#### More Advanced Search stuff
+
+Important that you go over [this tutorial](https://www.udemy.com/course/build-a-microservices-app-with-dotnet-and-nextjs-from-scratch/learn/lecture/39040426). It uses a "new style" switch statment to add some advanced filtering to your search query. Useful for (probably) just about any filtering logic you may require at some point.
+
 # References and Side-notes
 
 #### Take control of auto-generate VS Code Features

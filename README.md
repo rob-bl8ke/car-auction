@@ -92,6 +92,8 @@ docker compose up
 ```
 
 - Use `docker compose up -d` to run the postgres server in detached mode (you won't see the logs in the terminal).
+- Check that the container is up and running with `docker container ls -a`.
+- `docker container stop [id]` to stop instances.
 - Look for `LOG:  database system is ready to accept connections`.
 - Run the migrations to make sure it works...
 
@@ -101,3 +103,20 @@ dotnet ef database update
 - Should end with `Done.`
 - Install [PostgreSQL extension by Chris Kolkman for VS Code](https://marketplace.visualstudio.com/items?itemName=ckolkman.vscode-postgres) to see the database.
 - A new tab is created and you can navigate to the PostgreSQL explorer and create a connection to your database. Follow the instructions using your connection string as a guide to open the database to view.
+
+### Seeding Data
+
+This project hard codes the seeding of data, but it might be worth looking at imports.
+
+- [CsvHelper](https://github.com/JoshClose/CsvHelper) looks to be a good candidate for importing CSV Data and there is some mention of [DataFrame](https://devblogs.microsoft.com/dotnet/an-introduction-to-dataframe/).
+
+The database can be recreated and reseeded using the following commands. Confirm it in the Postgres Explorer.
+```
+cd .\src\AuctionService\
+dotnet ef database drop
+```
+Simply running the application should seed the data if no data exists.
+```
+dotnet watch
+```
+

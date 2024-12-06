@@ -19,4 +19,15 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Seed initial database development data
+try
+{
+    DbInitializer.InitDb(app);
+    
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex.Message);
+}
+
 app.Run();

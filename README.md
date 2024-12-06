@@ -171,3 +171,12 @@ dotnet_naming_style.prefix_underscore.required_prefix = _
 ```
 > This solution does not use it, as my personal preference is to use `this`.
 
+# Search Service
+
+Build up the solution and its project structure.
+```
+dotnet new webapi -o src/SearchService -controllers
+dotnet sln add .\src\SearchService
+
+dotnet watch --project .\src\SearchService\
+```

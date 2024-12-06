@@ -13,6 +13,19 @@ cd .\src\AuctionService\
 dotnet watch
 ```
 
+### Reset the database
+
+Simplest way is as follows (ensure that the postgres container is running):
+
+```
+dotnet ef database drop 
+```
+Once the database has been dropped, go and restart to create and reset the seed data. This is helpful if you want to run all the Postman tests without failure to ensure all your endpoints are working.
+
+```
+dotnet watch
+```
+
 ## Development Notes
 
 Use these commands find out information about your .NET  SDK installations.
@@ -71,6 +84,8 @@ Remove the unnecessary stuff
 - Remove any template controllers and entities.
 - Remove all unnecessary profiles from  `launchSettings` except for `http`. 
 - Remove HTTPS configuration and middleware.
+
+> **Note:** .NET CLI now allows one to create a `.gitignore` file using the following command: `dotnet new gitignore` 
 
 ### Run and watch the solution
 

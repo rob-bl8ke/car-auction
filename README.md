@@ -1,4 +1,19 @@
-## Command Line Stuff
+# Auction Service
+
+### Start up
+
+Terminal 1
+```
+docker compose up
+```
+
+Terminal 2
+```
+cd .\src\AuctionService\
+dotnet watch
+```
+
+## Development Notes
 
 Use these commands find out information about your .NET  SDK installations.
 ```
@@ -119,4 +134,25 @@ Simply running the application should seed the data if no data exists.
 ```
 dotnet watch
 ```
+
+# References and Side-notes
+
+#### Take control of auto-generate VS Code Features
+[This lecture](https://www.udemy.com/course/build-a-microservices-app-with-dotnet-and-nextjs-from-scratch/learn/lecture/39040266) discusses how to make code generated private class level members names with an underscore rather than using the `this` keyword.
+
+Simply put you need to add a `.editorconfig` in the solution root.
+
+```
+[*.{cs,vb}]
+dotnet_naming_rule.private_members_with_underscore.symbols  = private_fields
+dotnet_naming_rule.private_members_with_underscore.style    = prefix_underscore
+dotnet_naming_rule.private_members_with_underscore.severity = suggestion
+
+dotnet_naming_symbols.private_fields.applicable_kinds           = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+
+dotnet_naming_style.prefix_underscore.capitalization = camel_case
+dotnet_naming_style.prefix_underscore.required_prefix = _
+```
+> This solution does not use it, as my personal preference is to use `this`.
 

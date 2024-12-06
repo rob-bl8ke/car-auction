@@ -188,3 +188,5 @@ Add MongoDB to the `docker-compose.yml` file. Test that the container runs succe
 To grab hold of the seed data simply use the Postman call to `Get all auctions` and copy and paste the JSON data into a new file in the Data folder. Call it `auctions.json`.
 
 The `Item` class does not contain and Id property because it inherits from `Entity` which provides its own `MongoDB` equivalent. The import from the `auctions.json` file should populate the `_id` property in MongoDB for each `Item` document.
+
+[MongoDB.Entitites Official Website](https://mongodb-entities.com/) is a good place to go understand how we can use it perform CRUD and other operations against the MongoDB database. Basically, it provides a LINQ like interface to the MongoDB database. Take a look at the [Code Samples](https://mongodb-entities.com/wiki/Code-Samples.html) for a crash course.

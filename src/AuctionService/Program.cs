@@ -11,6 +11,9 @@ builder.Services.AddDbContext<AuctionDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+// Look in these assemblies for any class that derives from AutoMapper.Profile
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

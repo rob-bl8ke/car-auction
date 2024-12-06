@@ -150,6 +150,27 @@ Simply running the application should seed the data if no data exists.
 dotnet watch
 ```
 
+# Search Service
+
+Build up the solution and its project structure.
+```
+dotnet new webapi -o src/SearchService -controllers
+dotnet sln add .\src\SearchService
+
+dotnet watch --project .\src\SearchService\
+```
+
+### MongoDB
+
+Add MongoDB to the `docker-compose.yml` file. Test that the container runs successfully. Go and install `MongoDB for VS Code` by `MongoDB`. The extension will ask you to connect to `mongodb://root:mongopw@localhost:27017/` once you've supplied the username and password as it is defined in the `docker-compose.yml` file. A new tab should show up with a leaf icon. Here you can explore the database and run stuff.
+
+To grab hold of the seed data simply use the Postman call to `Get all auctions` and copy and paste the JSON data into a new file in the Data folder. Call it `auctions.json`.
+
+The `Item` class does not contain and Id property because it inherits from `Entity` which provides its own `MongoDB` equivalent. The import from the `auctions.json` file should populate the `_id` property in MongoDB for each `Item` document.
+
+[MongoDB.Entitites Official Website](https://mongodb-entities.com/) is a good place to go understand how to perform CRUD and other operations against the MongoDB database. It provides a LINQ like interface to the MongoDB database. Take a look at the [Code Samples](https://mongodb-entities.com/wiki/Code-Samples.html) for a crash course.
+
+
 # References and Side-notes
 
 #### Take control of auto-generate VS Code Features
@@ -170,23 +191,3 @@ dotnet_naming_style.prefix_underscore.capitalization = camel_case
 dotnet_naming_style.prefix_underscore.required_prefix = _
 ```
 > This solution does not use it, as my personal preference is to use `this`.
-
-# Search Service
-
-Build up the solution and its project structure.
-```
-dotnet new webapi -o src/SearchService -controllers
-dotnet sln add .\src\SearchService
-
-dotnet watch --project .\src\SearchService\
-```
-
-### MongoDB
-
-Add MongoDB to the `docker-compose.yml` file. Test that the container runs successfully. Go and install `MongoDB for VS Code` by `MongoDB`. The extension will ask you to connect to `mongodb://root:mongopw@localhost:27017/` once you've sup0plied the username and password as it is defined in the `docker-compose.yml` file. A new tab should show up with a leaf icon. Here you can explore the database and run stuff.
-
-To grab hold of the seed data simply use the Postman call to `Get all auctions` and copy and paste the JSON data into a new file in the Data folder. Call it `auctions.json`.
-
-The `Item` class does not contain and Id property because it inherits from `Entity` which provides its own `MongoDB` equivalent. The import from the `auctions.json` file should populate the `_id` property in MongoDB for each `Item` document.
-
-[MongoDB.Entitites Official Website](https://mongodb-entities.com/) is a good place to go understand how we can use it perform CRUD and other operations against the MongoDB database. Basically, it provides a LINQ like interface to the MongoDB database. Take a look at the [Code Samples](https://mongodb-entities.com/wiki/Code-Samples.html) for a crash course.

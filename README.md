@@ -171,6 +171,8 @@ The `Item` class does not contain and Id property because it inherits from `Enti
 [MongoDB.Entitites Official Website](https://mongodb-entities.com/) is a good place to go understand how to perform CRUD and other operations against the MongoDB database. It provides a LINQ like interface to the MongoDB database. Take a look at the [Code Samples](https://mongodb-entities.com/wiki/Code-Samples.html) for a crash course.
 
 
+Using a paged search with MongoDB.Entities is very simple. Simply use the `PagedSearch` method. The result will include the `PageCount`, `TotalCount`, and the results. See `SearchController`.
+
 # References and Side-notes
 
 #### Take control of auto-generate VS Code Features

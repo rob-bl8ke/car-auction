@@ -203,6 +203,10 @@ dotnet_naming_style.prefix_underscore.required_prefix = _
 This commit implements a synchronous transfer of data from the `AuctionService` to the `SearchService`. This occurs when the `SearchService` starts up and it assumes that the `AuctionService` is already up.
 
 - Synchronous data transfers and syncs effectively turn your app into a distributed monolith.
-- This approach is not resilient. `SearchService` assumes that the `AuctionService` is already up and running. What if it isn't? This is not an autonomous Microservice as it depends on the `AuctionService`.
 
-> Note that the named data volumes have been removed from `docker-compose.yml` to ensure that the data will always be removed when the  containers are stopped. This seems to happen for Windows and Mac OS anyhow, but just to be sure to get consistent behavior the named volumes have been removed.
+## Improve resilience
+At this point there is some resilience that exists by adding a retry policy. If the `AuctionService` cannot be found, the `SearchService` will continuously retry requests until the `AuctionService` comes up and a successful data transfer is made.
+
+Note how we also hook into the app lifetime `ApplicationStarted` event in order to ensure that the service starts correctly otherwise it will always be blocked by the `InitDb()` method. Now, the `DbInitializer.InitDb(app)` will only run after the the service has started.
+
+> This is still not a good practice as we are making a synchronous HTTP call to sync the data between the two services.

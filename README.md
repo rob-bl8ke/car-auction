@@ -223,6 +223,10 @@ cd ./src/Contracts/
 dotnet new gitignore
 ```
 
+See the `AuctionCreated` event class. There is no guarantee that the event will arrive instantaneously and there is no guarantee of the order, either. The idea is to achieve "eventual consistency" between the `AuctionService` and the `SearchService`.
+
+**Important**: Mass Transit requires the event class to be in the same namespace for both the producer and the consumer: another reason to create a shared library rather than copy and paste to each service.
+
 ## Asynchronous communication
 
 - Don't reach for synchronous communication without reviewing the design of your services.

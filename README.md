@@ -198,15 +198,89 @@ dotnet_naming_style.prefix_underscore.required_prefix = _
 ```
 > This solution does not use it, as my personal preference is to use `this`.
 
-# Some information about this commit
+# RabbitMQ and Mass Transit
 
-This commit implements a synchronous transfer of data from the `AuctionService` to the `SearchService`. This occurs when the `SearchService` starts up and it assumes that the `AuctionService` is already up.
+Take a look at the docker-compose.yml file. Use `docker compose up -d` to run everything. Navigate to http://localhost:15672/ and type in `guest` for both the username and password.
 
-- Synchronous data transfers and syncs effectively turn your app into a distributed monolith.
+Add the following packages: `MassTransit.RabbitMQ` by Chris Patterson.
 
-## Improve resilience
-At this point there is some resilience that exists by adding a retry policy. If the `AuctionService` cannot be found, the `SearchService` will continuously retry requests until the `AuctionService` comes up and a successful data transfer is made.
+Create  class library for the RabbitMQ infrastructure (shared by all services). Although this feels like we're breaking the "dependency" principle, its not a direct coupling between our services and it will be limited to the messaging infrastructure. This avoids having to add a `Contracts` folder for each service.
 
-Note how we also hook into the app lifetime `ApplicationStarted` event in order to ensure that the service starts correctly otherwise it will always be blocked by the `InitDb()` method. Now, the `DbInitializer.InitDb(app)` will only run after the the service has started.
+```
+dotnet new classlib -o src/Contracts
+dotnet sln add .\src\Contracts
 
-> This is still not a good practice as we are making a synchronous HTTP call to sync the data between the two services.
+cd ./src/SearchService/
+dotnet add reference ../../src/Contracts
+
+cd ../../
+
+ cd ./src/AuctionService/
+ dotnet add reference ../../src/Contracts
+
+cd ../..
+cd ./src/Contracts/
+dotnet new gitignore
+```
+
+## Asynchronous communication
+
+- Don't reach for synchronous communication without reviewing the design of your services.
+- Typically, a fully asynchronous approach is preferred over synchronous http requests.
+- Publish messages to a message broker and have other services subscribe to it.
+
+The `SearchService` will have its `MongoDB` database updated to become consistent with the `Postgres` database via async messaging via the `RabbitMQ` message broker. None of the services will be aware of each other. Services will only be aware of the service bus.
+
+Here are a couple examples of message brokers:
+- Rabbitmq
+- Azure Service Bus
+- Amazon
+
+> The preference for `RabbitMQ` in this solution is to satisfy the requirement of running the solution on the local developer computer.
+
+What if the event bus goes down? Is it a single point of failure? Services can no longer communicate with each other. However, if designed properly the Microservices will still do the jobs they're designed to do.
+
+- The message broker should be given high availability. If the message broker fails a new one should pop up in its place. It should be clustered, it should be fault tolerant, and it should have persistent storage.
+- Each service should implement some kind of retry policy if the service bus cannot immediately be reached. Aim for smart services that are able to carry out those tasks.
+- Aim for a stupid pipe that's only responsible for receiving messages and storing them in queues.
+
+### [RabbitMQ](https://www.rabbitmq.com/)
+
+And what is Rabbitmq? It's a message broker. It accepts and forwards messages.
+
+- It accepts a message into an exchange.
+- It forwards the messages to a queue that services can subscribe to
+- It uses the producer and consumer model (or publish/subscribe model).
+- Messages are stored on queues (message buffer).
+- Rabbitmq can have persistence associated with it too (for failure recovery)
+
+#### Exchanges
+
+- Publish a message, send it to an exchange.
+- Exchanges have bound queues.
+
+> Rabbitmq uses, as do other transports, the advanced message queuing protocol (AMQC).
+
+- The `AuctionService` is a publisher that's going to publish an "auction created event", to an exchange.
+- This exchange has one or more queues bound to that exchange
+- The message will be placed on each queue and wait for a consumer to pick up and consume the message.
+- There can be one queue, there can be two, there can be a thousand. The publisher of the message doesn't care.
+- Multiple consumers consume from the same queue or multiple queues.
+
+> There are other types of exchanges not used in this solution. This solution follows the "fan out" approach.
+
+### [Mass Transit](https://masstransit.io/introduction)
+
+There are various options to connect to RabbitMQ.
+- Use the Rabbitmq client and directly connect and send messages.
+- Use a layer of abstraction such as Mass Transit
+
+It provides a consistent abstraction on top of supported message transports. Similar to how Entity Framework provides an abstraction from a database technology. Mass transit achieves the same goal, but it provides an abstraction from the message transport technology.
+
+> In addition to RabbitMQ, Mass Transport supports Azure Service Bus, Amazon SQS, ActiveMQ, gRPC, and Kafka.
+
+And a different transport is decided on in the future other than RabbitMQ, then by using Mass Transit, code changes should be minimal.
+
+- It also provides other features such as message routing exception handling.
+- It provides a test harness to test the messaging behavior (in-memory), and to avoid the need for an external infrastructure service to provide testing.
+- It provides dependency injection capabilities.

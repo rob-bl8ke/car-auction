@@ -1,4 +1,5 @@
 using AuctionService.Data;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,13 @@ builder.Services.AddDbContext<AuctionDbContext>(options =>
 
 // Look in these assemblies for any class that derives from AutoMapper.Profile
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+// Configure Mass Transit for message queueing.
+builder.Services.AddMassTransit(x => {
+    x.UsingRabbitMq((context, cfg) => {
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 var app = builder.Build();
 

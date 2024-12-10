@@ -1,5 +1,4 @@
-using MongoDB.Driver;
-using MongoDB.Entities;
+using MassTransit;
 using Polly;
 using Polly.Extensions.Http;
 using SearchService.Data;
@@ -11,9 +10,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+
 builder.Services.AddHttpClient<AuctionSvcHttpClient>()
     // Add the retry policy
     .AddPolicyHandler(GetPolicy());
+
+// Configure Mass Transit for message queueing.
+builder.Services.AddMassTransit(x => {
+    x.UsingRabbitMq((context, cfg) => {
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 var app = builder.Build();
 

@@ -227,6 +227,10 @@ See the `AuctionCreated` event class. There is no guarantee that the event will 
 
 **Important**: Mass Transit requires the event class to be in the same namespace for both the producer and the consumer: another reason to create a shared library rather than copy and paste to each service.
 
+When creating consumers, always use the following naming convention: `[name]Consumer` and have it inherit from the generic `IConsumer` interface where the generic parameter is the auction class. See `AuctionCreatedConsumer`.
+
+To enhance the consumer Exchange and Queue name, look for how `SetEndpointNameFormatter` is used in the `Program.cs` class.
+
 ## Asynchronous communication
 
 - Don't reach for synchronous communication without reviewing the design of your services.

@@ -1,8 +1,8 @@
 using MassTransit;
 using Polly;
 using Polly.Extensions.Http;
+using SearchService.Consumers;
 using SearchService.Data;
-using SearchService.Models;
 using SearchService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,12 +11,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+// Look in these assemblies for any class that derives from AutoMapper.Profile
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 builder.Services.AddHttpClient<AuctionSvcHttpClient>()
     // Add the retry policy
     .AddPolicyHandler(GetPolicy());
 
 // Configure Mass Transit for message queueing.
 builder.Services.AddMassTransit(x => {
+    // Find all my consumers here (in this namespace)...
+    x.AddConsumersFromNamespaceContaining<AuctionCreatedConsumer>();
+    // Make sure the queue is called "search-auction-created"
+    x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("search", false));
     x.UsingRabbitMq((context, cfg) => {
         cfg.ConfigureEndpoints(context);
     });

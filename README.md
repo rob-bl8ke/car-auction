@@ -334,3 +334,29 @@ Now run the event broker container and note how the call from the `AuctionServic
 
 This way, a resilient "eventually consistent" state exists between the AuctionService and thee SearchService regardless of whether the event broker fails or not. Assuming ofcourse, that the event broker will at some point in the future be brought back online. 
 
+### What should happen when a message is received by the consumer, but the call to save to the consumer database (Search) fails?
+
+Is this possibility is left unsolved, it will lead to an inconsistent state in that the `Auction` database will end up being inconsistent with the `Search` database. The Auction database will have been updated with a new record but the Search database will not record the newly added Auction.
+
+At this point the `AuctionService` will return a 201 Created and everything will appear fine. The `SearchService` will time out after perhaps 30 seconds and throw and exception.
+
+```
+MongoDB.Driver.MongoConnectionException: An exception occurred while opening a connection to the server.
+```
+
+See the `Program` class and look for this code which applies a retry policy so that the message is retried 5 times at an interval of 5 seconds.
+
+```csharp
+x.UsingRabbitMq((context, cfg) => {
+    cfg.ReceiveEndpoint("search-auction-created", e => {
+        e.UseMessageRetry(r => r.Interval(5, 5));
+        e.ConfigureConsumer<AuctionCreatedConsumer>(context);
+    });
+    cfg.ConfigureEndpoints(context);
+});
+```
+On the `RabbitMQ` dashboard under exchanges note that several more queues have been created such as `MassTransit:Fault`, `search-auction-created_error`. The latter queue is created because we have an unhandled error returned from the `SearchService` which recorded in RabbitMQ.
+
+Navigate to the Queues and Streams tab and open "Get Messages". Here is is possible to view the exception information that occured when attempting to create the record as well as the consumer-type and endpoint that failed.
+
+In addition to this, the JSON payload is recorded.

@@ -58,13 +58,14 @@ public class AuctionsController : ControllerBase
         auction.Seller = "test-user";
 
         context.Add(auction);
+        
+        // Publish to the event broker
+        var newAuction = mapper.Map<AuctionDto>(auction);
+        await publishEndpoint.Publish(mapper.Map<AuctionCreated>(newAuction));
 
         var result = await context.SaveChangesAsync() > 0;
         if (!result) return BadRequest("Could not save changes to DB");
 
-        // Publish to the event broker
-        var newAuction = mapper.Map<AuctionDto>(auction);
-        await publishEndpoint.Publish(mapper.Map<AuctionCreated>(newAuction));
         
         // Using "CreatedAtAction" will set the Location header for where the newly created
         // resource can be found.

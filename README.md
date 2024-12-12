@@ -292,3 +292,45 @@ And a different transport is decided on in the future other than RabbitMQ, then 
 - It also provides other features such as message routing exception handling.
 - It provides a test harness to test the messaging behavior (in-memory), and to avoid the need for an external infrastructure service to provide testing.
 - It provides dependency injection capabilities.
+
+# Dealing with Failure Points
+
+![Current Architecture](https://www.plantuml.com/plantuml/png/POrB3e9038RtFKN3dYiGCDo04zIXqKdcWPtMnDiR57MGJTF_bQylIg8M0pOZBo4_8YV5qTD5A3P0JhFWi5vmEIuvhV5WJdrE4ylTEuQPbCvK-ECNW9knCMw5anMerXEJkEjX_BO1NZ1ikt_ANbQ50eUixMhsxzsIchzJ-8qHUawpnV04)
+
+### What should happen when RabbitMQ is down and the `AuctionService` send a message to the `SearchService`?
+
+Is this possibility is left unsolved, it will lead to an inconsistent state in that the `Auction` database will end up being inconsistent with the `Search` database. The Auction database will have been updated with a new record but the Search database will not record the newly added Auction.
+
+If the message broker is down the call to send a message to the queue will fail, but using an Email Outbox type of approach, one can get around this by setting up an "Outbox" for messages. An EF Core `Mass Transit` nuget package (`MassTransit.EntityFrameworkCore`) exists that will handle this type of behavior. One only needs to install the package, wire it up to the `AuctionService` web app and generate and execute another EF Core Migration.
+
+Add it to the `AuctionService` and run a new migration.
+
+```
+dotnet ef migrations add "Outbox" -o Data/Migrations
+```
+
+Mass Transit creates three new tables `InboxState`, `OutboxState`, `MessageState` which it uses to manage message Outbox state.
+
+> Look at the `DbContext` and `Program` classes to see what changes are required.
+
+```csharp
+x.AddEntityFrameworkOutbox<AuctionDbContext>( o => {
+    o.QueryDelay = TimeSpan.FromSeconds(10);
+    o.UsePostgres();
+    o.UseBusOutbox();
+});
+```
+
+Note the changes in the `AuctionsController` class. Since EF Core is being used to handle the state of the messages the entire scenario is based on the same transaction. This means that the "publish" statement is moved up above the `context.SaveChangesAsync()` statement in the `CreateAuction()` controller method. If the message is not published successfully, an Auction is never created and the inconsistent state problem that can occur if a messsage is not properly delivered is avoided.
+
+#### Test the failure mitigation behaviour
+
+Once this is set up make sure that all Docker containers except for the message broker are up and running. Running a Postman call to create an auction will result in a 201 created response. However, the call to the message broker would have failed behind the scenes.
+- Note how the `OutboxMessage` and the `OutboxState` tables contain a single record.
+- Note the terminal shows how the `MassTransit.EntityFrameworkCore` package code continuously fetches any unsent message data and attempts to resent to the message broker repeatedly.
+- Note how the `SearchService` continuously outputs an exception message because it is trying to communicate with the message broker.
+
+Now run the event broker container and note how the call from the `AuctionService` to the message broker is finally successful. Query the `SearchService` and verify that the Auction has been successfully created in the Search database.
+
+This way, a resilient "eventually consistent" state exists between the AuctionService and thee SearchService regardless of whether the event broker fails or not. Assuming ofcourse, that the event broker will at some point in the future be brought back online. 
+

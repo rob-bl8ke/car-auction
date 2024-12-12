@@ -1,0 +1,17 @@
+@startuml "Deployment Diagram"
+actor Actor
+component AuctionService
+database Auctions
+
+queue ServiceBus
+
+component SearchService
+database Search
+
+Actor -> AuctionService
+AuctionService -> Auctions
+
+AuctionService --> ServiceBus
+ServiceBus --> SearchService
+SearchService -> Search 
+@enduml

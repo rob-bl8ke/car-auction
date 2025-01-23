@@ -25,6 +25,9 @@ builder.Services.AddMassTransit(x => {
     // Make sure the queue is called "search-auction-created"
     x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("search", false));
     x.UsingRabbitMq((context, cfg) => {
+        // When receiving a message, if an exception occurs on this service's end
+        // (perhaps an intermitent network connection to db), have a first line
+        // defensive retry in place.
         cfg.ReceiveEndpoint("search-auction-created", e => {
             e.UseMessageRetry(r => r.Interval(5, 5));
             e.ConfigureConsumer<AuctionCreatedConsumer>(context);

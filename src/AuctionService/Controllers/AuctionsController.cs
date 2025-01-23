@@ -60,6 +60,8 @@ public class AuctionsController : ControllerBase
         context.Add(auction);
         
         // Publish to the event broker
+        // This can happen before saving changes to the Postgres database because the
+        // MassTransit message "outbox" will retry-send messages that have failed to publish.
         var newAuction = mapper.Map<AuctionDto>(auction);
         await publishEndpoint.Publish(mapper.Map<AuctionCreated>(newAuction));
 

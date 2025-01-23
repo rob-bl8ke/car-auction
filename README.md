@@ -7,9 +7,17 @@ Terminal 1
 docker compose up
 ```
 
+> Note that to delete all data in the containerized databases, simply run `docker compose down` which simply deletes all the data (for Mac OS and Windows).
+
 Terminal 2
 ```
 cd .\src\AuctionService\
+dotnet watch
+```
+
+Terminal 3
+```
+cd .\src\SearchService\
 dotnet watch
 ```
 

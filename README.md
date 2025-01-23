@@ -360,3 +360,17 @@ On the `RabbitMQ` dashboard under exchanges note that several more queues have b
 Navigate to the Queues and Streams tab and open "Get Messages". Here is is possible to view the exception information that occured when attempting to create the record as well as the consumer-type and endpoint that failed.
 
 In addition to this, the JSON payload is recorded.
+
+### When the retry attempt fails
+
+At this point the message will end up in RabbitMQ's fault queue (`search-auction-created_error`). One can listen to this queue from another consumer and try and process it or send it to some sort of error dashboard to be looked at.
+
+Look for a contrived example on the `SearchService` in which a message cannot be processed:
+
+```csharp
+  // Manufacture an exception that can't be resolved and will always fail after retries.
+  // (not network related)
+  if (item.Make == "Foo") throw new ArgumentException("Cannot sell cars with name of Foo");
+```
+
+Sending a call with this contrived data will result in a message that cannot be processed. Then, see how a demo consumer can listen to the fault queue (`AuctionService` `AuctionCreatedFaultConsumer` ) and optionally process or send details on to somewhere else (perhaps an error dashboard).

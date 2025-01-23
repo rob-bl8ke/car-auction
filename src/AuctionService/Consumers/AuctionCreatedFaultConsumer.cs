@@ -1,6 +1,7 @@
 using Contracts;
 using MassTransit;
 
+// TODO: Fix namespace (look for any others)
 namespace AuctionService;
 
 public class AuctionCreatedFaultConsumer : IConsumer<Fault<AuctionCreated>>

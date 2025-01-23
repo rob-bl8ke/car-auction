@@ -92,6 +92,8 @@ public class AuctionsController : ControllerBase
         auction.Item.Mileage = auctionDto.Mileage ?? auction.Item.Mileage;
         auction.Item.Year = auctionDto.Year ?? auction.Item.Year;
         
+        await publishEndpoint.Publish(mapper.Map<AuctionUpdated>(auction));
+
         var result = await context.SaveChangesAsync() > 0;
         if (!result) return BadRequest("Problem saving changes");
         
@@ -110,6 +112,8 @@ public class AuctionsController : ControllerBase
         // TODO: Check seller == username
 
         context.Remove(auction);
+
+        await publishEndpoint.Publish<AuctionDeleted>(new { Id = auction.Id.ToString() });
         var result = await context.SaveChangesAsync() > 0;
         
         if (!result) return BadRequest("Problem saving changes");
